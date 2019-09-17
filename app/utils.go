@@ -43,5 +43,5 @@ func NewAppUNSAFE(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest
 ) (app *App, keyMain, keyStaking *sdk.KVStoreKey, stakingKeeper staking.Keeper) {
 
 	app = NewApp(logger, db, traceStore, loadLatest, invCheckPeriod, baseAppOptions...)
-	return app, gapp.keys[baseapp.MainStoreKey], gapp.keys[staking.StoreKey], gapp.stakingKeeper
+	return app, app.keys[baseapp.MainStoreKey], app.keys[staking.StoreKey], app.stakingKeeper
 }
