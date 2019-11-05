@@ -13,4 +13,5 @@ const (
 	QuerierRoute = StoreKey
 	// Default denom
 	DefaultBondDenom = "uhsn"
+	QueryParameters  = "parameters"
 )

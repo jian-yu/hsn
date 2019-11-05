@@ -22,6 +22,7 @@ var (
 	NewParams           = types.NewParams
 	ValidateParams      = types.ValidateParams
 	DefaultParams       = types.DefaultParams
+	NewQuerier          = keeper.NewQuerier
 
 	ModuleCdc          = types.ModuleCdc
 	StorageProviderKey = types.StorageProviderKey

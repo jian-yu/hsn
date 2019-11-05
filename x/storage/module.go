@@ -2,16 +2,17 @@ package storage
 
 import (
 	"encoding/json"
-	"math/big"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/gorilla/mux"
-	"github.com/shegaoyuan/hsn/types"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 var _ module.AppModuleBasic = AppModuleBasic{}
@@ -68,56 +69,50 @@ func NewAppModule(keeper Keeper) AppModule {
 }
 
 func (AppModule) Name() string {
-	return types.ModuleName
+	return ModuleName
 }
 
-func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {}
+func (am AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
 func (am AppModule) Route() string {
-	return types.RouterKey
+	return ""
 }
 
 func (am AppModule) NewHandler() sdk.Handler {
-	return NewHandler(am.keeper)
+	return nil
 }
 
 func (am AppModule) QuerierRoute() string {
-	return types.ModuleName
+	return QuerierRoute
 }
 
 func (am AppModule) NewQuerierHandler() sdk.Querier {
 	return NewQuerier(am.keeper)
 }
 
-func (am AppModule) BeginBlock(ctx sdk.Context, bl abci.RequestBeginBlock) {
-	// Consider removing this when using evm as module without web3 API
-	bloom := ethtypes.BytesToBloom(am.keeper.bloom.Bytes())
-	am.keeper.SetBlockBloomMapping(ctx, bloom, bl.Header.GetHeight()-1)
-	am.keeper.SetBlockHashMapping(ctx, bl.Header.LastBlockId.GetHash(), bl.Header.GetHeight()-1)
-	am.keeper.bloom = big.NewInt(0)
-	am.keeper.txCount.reset()
-}
-
-func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	// Gas costs are handled within msg handler so costs should be ignored
-	ebCtx := ctx.WithBlockGasMeter(sdk.NewInfiniteGasMeter())
-
-	// Commit state objects to KV store
-	_, err := am.keeper.csdb.WithContext(ebCtx).Commit(true)
-	if err != nil {
-		panic(err)
-	}
-
+// InitGenesis performs genesis initialization for the mint module. It returns
+// no validator updates.
+func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
+	var genesisState GenesisState
+	ModuleCdc.MustUnmarshalJSON(data, &genesisState)
+	InitGenesis(ctx, am.keeper, genesisState)
 	return []abci.ValidatorUpdate{}
 }
 
-func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
-	var genesisState GenesisState
-	types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
-	return InitGenesis(ctx, am.keeper, genesisState)
-}
-
+// ExportGenesis returns the exported genesis state as raw bytes for the mint
+// module.
 func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
 	gs := ExportGenesis(ctx, am.keeper)
-	return types.ModuleCdc.MustMarshalJSON(gs)
+	return ModuleCdc.MustMarshalJSON(gs)
+}
+
+// BeginBlock returns the begin blocker for the mint module.
+func (am AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {
+	BeginBlocker(ctx, am.keeper)
+}
+
+// EndBlock returns the end blocker for the mint module. It returns no validator
+// updates.
+func (AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+	return []abci.ValidatorUpdate{}
 }
