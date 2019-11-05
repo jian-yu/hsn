@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"github.com/gogo/protobuf/codec"
+	"github.com/cosmos/cosmos-sdk/codec"
+
 	"github.com/gorilla/mux"
 	"github.com/shegaoyuan/hsn/types"
 	"github.com/spf13/cobra"
@@ -13,26 +14,24 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 )
 
-var _ module.AppModuleBasic = AppMoudleBasic{}
+var _ module.AppModuleBasic = AppModuleBasic{}
 var _ module.AppModule = AppModule{}
 
 type AppModuleBasic struct{}
 
 func (AppModuleBasic) Name() string {
-	return types.ModuleName
+	return ModuleName
 }
 
-func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
-	types.RegisterCodec(cdc)
-}
+func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {}
 
 func (AppModuleBasic) DefaultGenesis() json.RawMessage {
-	return types.ModuleCdc.MustMarshalJSON(DefaultGenesisState())
+	return ModuleCdc.MustMarshalJSON(DefaultGenesisState())
 }
 
 func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	var data GenesisState
-	err := types.ModuleCdc.UnmarshalJSON(bz, &data)
+	err := ModuleCdc.UnmarshalJSON(bz, &data)
 	if err != nil {
 		return err
 	}

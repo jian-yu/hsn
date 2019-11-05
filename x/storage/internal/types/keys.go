@@ -11,4 +11,6 @@ const (
 	StoreKey = ModuleName
 	// QuerierRoute is the querier route for the storage store.
 	QuerierRoute = StoreKey
+	// Default denom
+	DefaultBondDenom = "uhsn"
 )

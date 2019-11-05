@@ -18,7 +18,7 @@ type Keeper struct {
 	supplyKeeper  types.SupplyKeeper
 }
 
-func New(cdc *codec.Codec, key sdk.StoreKey, paramSpace params.Subspace, stakingKeeper types.StakingKeeper, supplyKeeper types.SupplyKeeper) Keeper {
+func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSpace params.Subspace, stakingKeeper types.StakingKeeper, supplyKeeper types.SupplyKeeper) Keeper {
 	if addr := supplyKeeper.GetModuleAddress(types.ModuleName); addr == nil {
 		panic("the storage module account has not been set")
 	}
